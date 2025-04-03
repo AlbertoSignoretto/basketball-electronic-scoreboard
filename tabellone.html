@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="output.css" rel="stylesheet">
+  </head>
+
+  <body class="tabellone">
+    <div class="intestazione">
+      <div id="squadra-casa"></div>
+
+      <div id="squadra-ospiti"></div>
+    </div>
+    <div class="corpo">
+      <div id="timeout-falli-casa" class="timeout-falli"></div>
+      <div id="punteggio-casa" class="punteggio"></div>
+      <div id="quarto" class="quarto"></div>
+      <div id="punteggio-ospiti" class="punteggio"></div>
+      <div id="timeout-falli-ospiti" class="timeout-falli"></div>
+    </div>
+    <div class="footer">
+      <div id="falli-casa" class="falli"></div>
+      <div id="freccia-casa" class="falli"></div>
+      <div id="timer" class="timer"></div>
+      <div id="freccia-ospiti" class="falli"></div>
+      <div id="falli-ospiti" class="falli"></div>
+    </div>
+    <button class="info-button" onclick="toggleInfo()">&quest;</button>
+    <div class="info-box" id="info" style="display: none;">
+      <ul>
+          <li>PREMI '1','2','3' PER AUMENTARE IL PUNTEGGIO DI CASA</li>
+
+      </ul>
+    </div>
+  <script>
+    // gestione timer
+    let timerRunning = false;
+    let intervalloTimer = null;
+    function startTimer() {
+      if (timerRunning || currentInfo.tempo <= 0) return;
+
+      timerRunning = true;
+      if (currentInfo.tempo > 0) {
+        currentInfo.tempo -= 1;
+        window.electronAPI.setInfo({ tempo: currentInfo.tempo });
+      }
+      intervalloTimer = setInterval(() => {
+        if (currentInfo.tempo > 0) {
+          currentInfo.tempo -= 1;
+          window.electronAPI.setInfo({ tempo: currentInfo.tempo });
+        } else {
+          stopTimer();
+        }
+      }, 1000);
+    }
+    function stopTimer() {
+      timerRunning = false;
+      clearInterval(intervalloTimer);
+      intervalloTimer = null;
+    }
+    //gestione bottoni e comdandi
+    let currentInfo={};
+    const pressedKeys = new Set();
+    document.addEventListener('keydown', (event) => {
+      const key = event.key.toUpperCase();
+      const code = event.code;
+      const isAlt = event.altKey;
+      pressedKeys.add(key);
+      // punteggio
+      if ([1,2,3].includes(Number(key))) {
+        const valore = Number(key);
+        const modifica = pressedKeys.has('-') ? -valore : valore;
+        if(code.startsWith('Digit')){
+          if(currentInfo.punteggioCasa+modifica>=0 && currentInfo.punteggioCasa+modifica<=199){
+            window.electronAPI.setInfo({
+              punteggioCasa: currentInfo.punteggioCasa + modifica
+            });
+          }
+        }
+        else{
+          if(currentInfo.punteggioOspiti+modifica>=0 && currentInfo.punteggioOspiti+modifica<=199){
+            window.electronAPI.setInfo({
+              punteggioOspiti: currentInfo.punteggioOspiti + modifica
+            });
+          }
+        }
+      }
+      //falli
+      if (code === 'KeyF') {
+        if (isAlt) {
+          if (currentInfo.falliOspiti + 1 > 5) {
+            window.electronAPI.setInfo({ falliOspiti: 0 });
+          } else {
+            window.electronAPI.setInfo({ falliOspiti: currentInfo.falliOspiti + 1 });
+          }
+        }
+        else {
+          if (currentInfo.falliCasa + 1 > 5) {
+            window.electronAPI.setInfo({ falliCasa: 0 });
+          } else {
+            window.electronAPI.setInfo({ falliCasa: currentInfo.falliCasa + 1 });
+          }
+        }
+      }
+      //timer
+      if (code === 'Space'  && !event.repeat){
+        if (timerRunning) {
+          stopTimer();
+        } else {
+          startTimer();
+        }
+      }
+      // quarto
+      if(code==='KeyQ'){
+        if (currentInfo.quartoGioco==4){
+          window.electronAPI.setInfo({ quartoGioco: 1});
+        }
+        else{
+          window.electronAPI.setInfo({ quartoGioco: currentInfo.quartoGioco+1});
+        }
+      }
+      //timeout
+      if(code==='KeyT'){
+        if (isAlt) {
+          if (currentInfo.timeoutOspiti + 1 > 3){
+            window.electronAPI.setInfo({ timeoutOspiti: 0})
+          }
+          else{
+            window.electronAPI.setInfo({ timeoutOspiti: currentInfo.timeoutOspiti+1})
+          }
+        }
+        else{
+          if (currentInfo.timeoutCasa + 1 > 3){
+            window.electronAPI.setInfo({ timeoutCasa: 0})
+          }
+          else{
+            window.electronAPI.setInfo({ timeoutCasa: currentInfo.timeoutCasa+1})
+          }
+        }
+      }
+      //freccia
+      if(code=='ArrowRight'){
+        window.electronAPI.setInfo({ freccia: 'ospiti'})
+      }
+      if(code=='ArrowLeft'){
+        window.electronAPI.setInfo({ freccia: 'casa'})
+      }
+      //timer
+      if(code==='KeyM'){
+        if(pressedKeys.has('-')){
+          let nuoviSecondi = Math.max(currentInfo.tempo - 60, 0);
+          currentInfo.tempo = nuoviSecondi;
+          window.electronAPI.setInfo({ tempo: nuoviSecondi });
+        }
+        if(pressedKeys.has('+')){
+          let nuoviSecondi = Math.min(currentInfo.tempo + 60, 600);
+          currentInfo.tempo = nuoviSecondi;
+          window.electronAPI.setInfo({ tempo: nuoviSecondi });
+        }
+      }
+      if(code==='KeyS'){
+        if(pressedKeys.has('-')){
+          let nuoviSecondi = Math.max(currentInfo.tempo - 10, 0);
+          currentInfo.tempo = nuoviSecondi;
+          window.electronAPI.setInfo({ tempo: nuoviSecondi });
+        }
+        if(pressedKeys.has('+')){
+          let nuoviSecondi = Math.min(currentInfo.tempo + 10, 600);
+          currentInfo.tempo = nuoviSecondi;
+          window.electronAPI.setInfo({ tempo: nuoviSecondi });
+        }
+      }
+    })
+    document.addEventListener('keyup', (event) => {
+      pressedKeys.delete(event.key.toLowerCase());
+    });
+    function formattaTempo(secondi) {
+      const min = Math.floor(secondi / 60);
+      const sec = secondi % 60;
+      return `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+    }
+    function aggiornaUI(data) {
+      // intestazione
+      document.getElementById('squadra-casa').textContent = data.squadraCasa;
+      document.getElementById('squadra-ospiti').textContent = data.squadraOspiti;
+      //corpo
+      document.getElementById('punteggio-casa').textContent = data.punteggioCasa;
+      document.getElementById('quarto').textContent = data.quartoGioco;
+      document.getElementById('punteggio-ospiti').textContent = data.punteggioOspiti;
+      let timeoutFalliOspiti=data.falliOspiti>=4?'<span class=\'text-red-400\'>\u25CF<br></span>':''
+      let timeoutFalliCasa=data.falliCasa>=4?'<span class=\'text-red-400\'>\u25CF<br></span>':''
+      timeoutFalliOspiti+='\u25CF<br>'.repeat(data.timeoutOspiti);
+      timeoutFalliCasa+='\u25CF<br>'.repeat(data.timeoutCasa);
+      document.getElementById('timeout-falli-ospiti').innerHTML  = timeoutFalliOspiti;
+      document.getElementById('timeout-falli-casa').innerHTML  = timeoutFalliCasa;
+      //footer
+      document.getElementById('falli-casa').textContent = data.falliCasa;
+      document.getElementById('freccia-casa').textContent = data.freccia=='casa' ? "\u25C0":"";
+      document.getElementById('timer').textContent = formattaTempo(data.tempo);
+      document.getElementById('falli-ospiti').textContent = data.falliOspiti;
+      document.getElementById('freccia-ospiti').textContent = data.freccia=='ospiti' ? "\u25B6":"";
+    }
+    window.electronAPI.getInfo().then((data) => {
+      currentInfo = data;
+      aggiornaUI(data);
+    });
+    window.electronAPI.updateInfo((data) => {
+      currentInfo = data;
+      aggiornaUI(data);
+    });
+    function toggleInfo() {
+      const infoBox = document.getElementById("info");
+      infoBox.style.display = infoBox.style.display === "none" ? "block" : "none";
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+    font-family: 'Seven Segment';
+    src: url('SevenSegment.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.tabellone{
+    @apply bg-black m-0 p-0 leading-none;
+    font-family: 'Seven Segment', monospace
+}
+.intestazione{
+    @apply text-white font-bold text-10xl;
+    @apply grid grid-cols-2 gap-x-16 text-center;
+}
+.corpo{
+    @apply grid grid-cols-5 text-center;
+}
+.punteggio{
+   @apply text-red-600 font-bold text-12xl;
+}
+.quarto{
+    @apply text-green-400 font-bold text-9xl;
+}
+.timeout-falli{
+    @apply flex flex-col text-green-400 text-5xl;
+}
+
+.footer{
+    @apply grid grid-cols-5 text-center;
+}
+.falli{
+    @apply flex flex-col text-red-600 text-9xl;
+}
+.timer{
+    @apply text-green-400 font-bold text-12xl;
+}
+.info-button {
+    @apply w-12 h-12 rounded-full bg-blue-500 text-white m-5;
+}
+.info-box{
+    @apply text-white font-bold text-5xl m-5;
+}
