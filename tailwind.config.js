@@ -13,6 +13,7 @@ module.exports = {
         '10xl': '12rem',
         '11xl': '14rem',
         '12xl': '16rem',
+        '25xl':'25rem'
       }
 
     },

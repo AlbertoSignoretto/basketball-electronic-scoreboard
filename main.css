@@ -8,40 +8,52 @@
     font-weight: normal;
     font-style: normal;
 }
-
+html, body {
+    height: 100%;
+}
+/* 
+tabellone
+*/
 .tabellone{
-    @apply bg-black m-0 p-0 leading-none;
-    font-family: 'Seven Segment', monospace
-}
-.intestazione{
-    @apply text-white font-bold text-10xl;
-    @apply grid grid-cols-2 gap-x-16 text-center;
-}
-.corpo{
-    @apply grid grid-cols-5 text-center;
-}
-.punteggio{
-   @apply text-red-600 font-bold text-12xl;
+    font-family: 'Seven Segment', monospace;
+    @apply bg-black m-0 leading-none select-none;
+    @apply grid grid-rows-5  grid-cols-10 gap-5 text-center place-items-center p-16;
 }
 .quarto{
-    @apply text-green-400 font-bold text-9xl;
+    @apply text-green-400 text-11xl row-span-2 col-span-2;
 }
-.timeout-falli{
-    @apply flex flex-col text-green-400 text-5xl;
+.squadra{
+    @apply col-span-5 text-12xl text-white;
 }
-
-.footer{
-    @apply grid grid-cols-5 text-center;
-}
-.falli{
-    @apply flex flex-col text-red-600 text-9xl;
+.punteggio{
+    @apply col-span-3 row-span-2 text-25xl text-red-600;
 }
 .timer{
-    @apply text-green-400 font-bold text-12xl;
+    @apply col-span-6 text-25xl row-span-2 text-green-400;
 }
-.info-button {
-    @apply w-12 h-12 rounded-full bg-blue-500 text-white m-5;
+.timeout-falli{
+    @apply row-span-2 text-5xl grid-rows-4 gap-1;
 }
-.info-box{
-    @apply text-white font-bold text-5xl m-5;
+.timeout{
+    @apply text-green-400;
 }
+.bonus{
+    @apply text-red-600;
+}
+.falli{
+    @apply row-span-2 text-red-600 text-12xl;
+}
+.freccia{
+    @apply row-span-2 text-red-600 text-11xl;
+}
+.form-group{
+    @apply space-x-5;
+}
+.form-label{
+    @apply font-bold
+}
+.form-input{
+    @apply border-2 border-blue-400 px-2;
+}
+
+

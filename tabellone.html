@@ -5,37 +5,39 @@
   </head>
 
   <body class="tabellone">
-    <div class="intestazione">
-      <div id="squadra-casa"></div>
-
-      <div id="squadra-ospiti"></div>
+    <div class="squadra" id="squadra-casa">CASA</div>
+    <div class="squadra" id="squadra-ospiti">OSPITI</div>
+    <div class="timeout-falli">
+      <div id="bonus-casa" class="bonus">●</div>
+      <div id="to3-casa" class="timeout">●</div>
+      <div id="to2-casa" class="timeout">●</div>
+      <div id="to1-casa" class="timeout">●</div>
     </div>
-    <div class="corpo">
-      <div id="timeout-falli-casa" class="timeout-falli"></div>
-      <div id="punteggio-casa" class="punteggio"></div>
-      <div id="quarto" class="quarto"></div>
-      <div id="punteggio-ospiti" class="punteggio"></div>
-      <div id="timeout-falli-ospiti" class="timeout-falli"></div>
+    <div class="punteggio" id="punteggio-casa"></div>
+    <div class="quarto" id="quarto"></div>
+    <div class="punteggio" id="punteggio-ospiti"></div>
+    <div class="timeout-falli">
+      <div id="bonus-ospiti" class="bonus">●</div>
+      <div id="to3-ospiti" class="timeout">●</div>
+      <div id="to2-ospiti" class="timeout">●</div>
+      <div id="to1-ospiti" class="timeout">●</div>
     </div>
-    <div class="footer">
-      <div id="falli-casa" class="falli"></div>
-      <div id="freccia-casa" class="falli"></div>
-      <div id="timer" class="timer"></div>
-      <div id="freccia-ospiti" class="falli"></div>
-      <div id="falli-ospiti" class="falli"></div>
-    </div>
-    <button class="info-button" onclick="toggleInfo()">&quest;</button>
-    <div class="info-box" id="info" style="display: none;">
-      <ul>
-          <li>PREMI '1','2','3' PER AUMENTARE IL PUNTEGGIO DI CASA</li>
-
-      </ul>
-    </div>
+    <div class="falli" id="falli-casa"></div>
+    <div class="freccia" id="freccia-casa">◀</div>
+    <div class="timer" id="timer"></div>
+    <div class="freccia" id="freccia-ospiti">▶</div>
+    <div class="falli" id="falli-ospiti"></div>
+    <audio id="end-timer" class="hidden" src="air-horn.mp3" preload="auto"></audio>
   <script>
+    // ritorna in full screen
+    document.addEventListener('dblclick', () => {
+      window.electronAPI.setFullScreen();
+    });
     // gestione timer
     let timerRunning = false;
     let intervalloTimer = null;
     function startTimer() {
+      const suonoFine = document.getElementById('end-timer');
       if (timerRunning || currentInfo.tempo <= 0) return;
 
       timerRunning = true;
@@ -46,6 +48,9 @@
       intervalloTimer = setInterval(() => {
         if (currentInfo.tempo > 0) {
           currentInfo.tempo -= 1;
+          if(currentInfo.tempo==0){
+            suonoFine.play();
+          }
           window.electronAPI.setInfo({ tempo: currentInfo.tempo });
         } else {
           stopTimer();
@@ -112,6 +117,9 @@
       // quarto
       if(code==='KeyQ'){
         if (currentInfo.quartoGioco==4){
+          window.electronAPI.setInfo({ quartoGioco: 'OT'});
+        }
+        else if(currentInfo.quartoGioco=='OT'){
           window.electronAPI.setInfo({ quartoGioco: 1});
         }
         else{
@@ -179,25 +187,66 @@
       return `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
     }
     function aggiornaUI(data) {
-      // intestazione
       document.getElementById('squadra-casa').textContent = data.squadraCasa;
       document.getElementById('squadra-ospiti').textContent = data.squadraOspiti;
-      //corpo
       document.getElementById('punteggio-casa').textContent = data.punteggioCasa;
-      document.getElementById('quarto').textContent = data.quartoGioco;
       document.getElementById('punteggio-ospiti').textContent = data.punteggioOspiti;
-      let timeoutFalliOspiti=data.falliOspiti>=4?'<span class=\'text-red-400\'>\u25CF<br></span>':''
-      let timeoutFalliCasa=data.falliCasa>=4?'<span class=\'text-red-400\'>\u25CF<br></span>':''
-      timeoutFalliOspiti+='\u25CF<br>'.repeat(data.timeoutOspiti);
-      timeoutFalliCasa+='\u25CF<br>'.repeat(data.timeoutCasa);
-      document.getElementById('timeout-falli-ospiti').innerHTML  = timeoutFalliOspiti;
-      document.getElementById('timeout-falli-casa').innerHTML  = timeoutFalliCasa;
-      //footer
-      document.getElementById('falli-casa').textContent = data.falliCasa;
-      document.getElementById('freccia-casa').textContent = data.freccia=='casa' ? "\u25C0":"";
+      document.getElementById('quarto').textContent = data.quartoGioco;
       document.getElementById('timer').textContent = formattaTempo(data.tempo);
+      document.getElementById('falli-casa').textContent = data.falliCasa;
       document.getElementById('falli-ospiti').textContent = data.falliOspiti;
-      document.getElementById('freccia-ospiti').textContent = data.freccia=='ospiti' ? "\u25B6":"";
+      if(data.freccia==''){
+        document.getElementById('freccia-ospiti').classList.add('invisible')
+        document.getElementById('freccia-casa').classList.add('invisible')
+      }
+      else if(data.freccia=='casa'){
+        document.getElementById('freccia-ospiti').classList.add('invisible')
+        document.getElementById('freccia-casa').classList.remove('invisible')
+      }
+      else if(data.freccia=='ospiti'){
+        document.getElementById('freccia-casa').classList.add('invisible')
+        document.getElementById('freccia-ospiti').classList.remove('invisible')
+      }
+      if(data.falliCasa<4){
+        document.getElementById('bonus-casa').classList.add('invisible')
+      }
+      else{
+        document.getElementById('bonus-casa').classList.remove('invisible')
+      }
+      if(data.falliOspiti<4){
+        document.getElementById('bonus-ospiti').classList.add('invisible')
+      }
+      else{
+        document.getElementById('bonus-ospiti').classList.remove('invisible')
+      }
+      if(data.timeoutCasa==0){
+        document.getElementById('to1-casa').classList.add('invisible')
+        document.getElementById('to2-casa').classList.add('invisible')
+        document.getElementById('to3-casa').classList.add('invisible')
+      }
+      else if(data.timeoutCasa==1){
+        document.getElementById('to1-casa').classList.remove('invisible')
+      }
+      else if(data.timeoutCasa==2){
+        document.getElementById('to2-casa').classList.remove('invisible')
+      }
+      else if(data.timeoutCasa==3){
+        document.getElementById('to3-casa').classList.remove('invisible')
+      }
+      if(data.timeoutOspiti==0){
+        document.getElementById('to1-ospiti').classList.add('invisible')
+        document.getElementById('to2-ospiti').classList.add('invisible')
+        document.getElementById('to3-ospiti').classList.add('invisible')
+      }
+      else if(data.timeoutOspiti==1){
+        document.getElementById('to1-ospiti').classList.remove('invisible')
+      }
+      else if(data.timeoutOspiti==2){
+        document.getElementById('to2-ospiti').classList.remove('invisible')
+      }
+      else if(data.timeoutOspiti==3){
+        document.getElementById('to3-ospiti').classList.remove('invisible')
+      }
     }
     window.electronAPI.getInfo().then((data) => {
       currentInfo = data;
@@ -207,10 +256,11 @@
       currentInfo = data;
       aggiornaUI(data);
     });
-    function toggleInfo() {
-      const infoBox = document.getElementById("info");
-      infoBox.style.display = infoBox.style.display === "none" ? "block" : "none";
-    }
   </script>
+        /*
+        crea pagina iniziale per impostare le variabili
+        trasformare in un applicazione
+        cambiare icona di caricamento
+        */
 </body>
 </html>

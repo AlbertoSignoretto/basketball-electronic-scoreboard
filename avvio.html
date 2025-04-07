@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Avvia partita</title>
+  <link href="output.css" rel="stylesheet">
+  <script>
+    function avviaPartita() {
+      const info = {
+        squadraCasa: document.getElementById('casa').value || "CASA",
+        squadraOspiti: document.getElementById('ospiti').value || "OSPITI",
+        punteggioCasa: parseInt(document.getElementById('punti-casa').value) || 0,
+        punteggioOspiti: parseInt(document.getElementById('punti-ospiti').value) || 0,
+        falliCasa:0,
+        falliOspiti:0,
+        timeoutCasa:0,
+        timeoutOspiti: 0,
+        quartoGioco:1,
+        tempo: parseInt(document.getElementById('tempo').value) * 60 || 600,
+        freccia: '',
+        posizioneX: parseInt(document.getElementById('x').value)||100,
+        posizioneY: parseInt(document.getElementById('y').value)||100,
+        larghezza: parseInt(document.getElementById('larghezza').value)||1600,
+        altezza:parseInt(document.getElementById('altezza').value)||1200
+      };
+      window.electronAPI.startGame(info);
+    }
+  </script>
+</head>
+<body class="bg-gray-300 flex flex-col space-y-5 p-5">
+    <h1 class="text-center font-bold text-2xl mb-7">Configura Partita</h1>
+    <div class="form-group">
+        <label class="form-label">Squadra casa</label>
+        <input class="form-input"  type="text" id="casa" value="CASA" />
+    </div>
+    <div class="form-group">
+        <label class="form-label">Squadra ospite</label>
+        <input class="form-input"  type="text" id="ospiti" value="OSPITI" />
+    </div>
+    <div class="form-group">
+        <label class="form-label">Punti casa</label>
+        <input class="form-input"  type="text" id="punti-casa" value="0" />
+    </div>
+    <div class="form-group">
+        <label class="form-label">Punti ospiti</label>
+        <input class="form-input"  type="text" id="punti-ospiti" value="0" />
+    </div>
+    <div class="form-group">
+        <label class="form-label">Timer (minuti)</label>
+        <input class="form-input"  type="number" id="tempo" value="10" />
+    </div>
+    <h1 class="text-center font-bold text-2xl">Configura finestra</h1>
+    <div class="form-group">
+        <label class="form-label">Posizione X</label>
+        <input class="form-input"  type="number" id="x" value="100" />
+    </div>
+    <div class="form-group">
+        <label class="form-label">Posizione Y</label>
+        <input class="form-input"  type="number" id="y" value="100" />
+    </div>
+    <div class="form-group">
+        <label class="form-label">Larghezza</label>
+        <input class="form-input"  type="number" id="larghezza" value="1600" />
+    </div>
+    <div class="form-group">
+        <label class="form-label">Altezza</label>
+        <input class="form-input"  type="number" id="altezza" value="1200" />
+    </div>
+    <div class="flex justify-center">
+        <button class="bg-blue-600 p-5 text-white text-4xl rounded" onclick="avviaPartita()">Avvia partita</button>
+      </div>
+ 
+</body>
+</html>
